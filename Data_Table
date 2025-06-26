@@ -1,0 +1,178 @@
+CREATE TABLE Address (
+    AddressID INT PRIMARY KEY,
+    StreetName VARCHAR(100) NOT NULL,
+    City VARCHAR(50) NOT NULL,
+    State VARCHAR(50) NOT NULL,
+    BuildingName VARCHAR(100) NOT NULL,
+    Floor INT NOT NULL CHECK (Floor >= 0)
+);
+
+CREATE TABLE Phone (
+    PhoneNo VARCHAR(15) NOT NULL,
+    OwnerID INT NOT NULL,
+    OwnerType VARCHAR(20) NOT NULL CHECK (OwnerType IN ('Customer', 'Supplier')),
+    PRIMARY KEY (PhoneNo, OwnerID, OwnerType)
+);
+
+CREATE TABLE Customer (
+    CustomerID INT PRIMARY KEY,
+    FirstName VARCHAR(50) NOT NULL,
+    MiddleName VARCHAR(50) DEFAULT '',
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    AddressID INT NOT NULL, 
+    FOREIGN KEY (AddressID) REFERENCES Address(AddressID)
+);
+
+CREATE TABLE PLACES(
+	CustomerID INT NOT NULL,
+	OrderID INT NOT NULL,
+    FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID),
+    FOREIGN KEY (OrderID) REFERENCES OrderID(OrderID),
+	PRIMARY KEY (CustomerID, OrderID)
+);
+
+CREATE TABLE Category (
+    CategoryID INT PRIMARY KEY,
+    CategoryName VARCHAR(50) NOT NULL UNIQUE,
+    Description TEXT NOT NULL
+);
+
+CREATE TABLE Supplier (
+    SupplierID INT PRIMARY KEY,
+    SupplierName VARCHAR(100) NOT NULL UNIQUE,
+    SupplierEmail VARCHAR(100) NOT NULL UNIQUE,
+    AddressID INT NOT NULL, 
+    FOREIGN KEY (AddressID) REFERENCES Address(AddressID),
+    SupplierRating DECIMAL(3, 2) NOT NULL CHECK (SupplierRating BETWEEN 0 AND 5)
+);
+
+CREATE TABLE Sells(
+    SupplierID INT NOT NULL,
+    ProductID INT NOT NULL,
+    FOREIGN KEY (SupplierID) REFERENCES Supplier(SupplierID),
+    FOREIGN KEY (ProductID) REFERENCES Supplier(ProductID),
+	PRIMARY KEY (SupplierID, ProductID)
+);
+
+CREATE TABLE Product (
+    ProductID INT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    CategoryID INT NOT NULL,
+	InventoryID INT,
+	SupplierID INT NOT NULL,
+    MRP DECIMAL(10, 2) NOT NULL CHECK (MRP > 0),
+    StockQuantity INT NOT NULL DEFAULT 0 CHECK (StockQuantity >= 0),
+    FOREIGN KEY (SupplierID) REFERENCES Supplier(SupplierID),
+    FOREIGN KEY (CategoryID) REFERENCES Category(CategoryID),
+    FOREIGN KEY (InventoryID) REFERENCES Inventory(InventoryID)
+);
+
+CREATE TABLE Contains(
+    ProductID INT NOT NULL,
+    OrderID INT NOT NULL,	-- reference--
+    CustomerID INT NOT NULL,
+	Quantity INT NOT NULL CHECK (Quantity > 0),
+	PRIMARY KEY (ProductID, OrderID),
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
+    FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID),
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
+);
+
+CREATE TABLE OrderList (
+    OrderID INT,
+    CustomerID INT NOT NULL,
+	PRIMARY KEY (CustomerID, OrderID),
+    FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID),
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
+);
+
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    OrderDate DATE NOT NULL,
+    ShippingDate DATE NOT NULL,
+    OrderAmount DECIMAL(10, 2) NOT NULL CHECK (OrderAmount >= 0),
+    Status VARCHAR(50) NOT NULL DEFAULT 'Pending'
+);
+
+CREATE TABLE Ships(
+    OrderID INT NOT NULL,
+    ShipmentID INT NOT NULL,
+	PRIMARY KEY (OrderID, ShipmentID),
+    FOREIGN KEY (OrderID) REFERENCES OrderList(OrderID),
+    FOREIGN KEY (OrderID) REFERENCES OrderList(OrderID)
+);
+
+CREATE TABLE Shipments (
+    ShipmentID INT PRIMARY KEY,
+    OrderID INT NOT NULL,
+    ShippingDate DATE ,
+    DeliveryDate DATE,
+    ShippingStatus VARCHAR(50) NOT NULL DEFAULT 'In Transit',
+    FOREIGN KEY (OrderID) REFERENCES OrderList(OrderID)
+);
+
+
+CREATE TABLE Payment (
+    PaymentID INT PRIMARY KEY,
+    OrderID INT NOT NULL,
+	CustomerID INT NOT NULL,
+	Amount DECIMAL(10, 2) NOT NULL CHECK (Amount >= 0),
+    PaymentMode VARCHAR(50) NOT NULL CHECK (PaymentMode IN ('Credit Card', 'Debit Card', 'UPI', 'Net Banking', 'Cash')),
+    PaymentDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	SupplierID INT NOT NULL,
+	PaymentStatus VARCHAR(50) NOT NULL CHECK (PaymentStatus IN ('Pending','Completed','Failed')),
+    FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID),
+    FOREIGN KEY (OrderID) REFERENCES OrderList(OrderID),
+    FOREIGN KEY (SupplierID) REFERENCES Supplier(SupplierID)
+);
+
+
+
+CREATE TABLE Warehouse (
+    WarehouseID INT PRIMARY KEY,
+    Location VARCHAR(100) NOT NULL UNIQUE,
+    Capacity INT NOT NULL CHECK (Capacity > 0)
+);
+
+CREATE TABLE Inventory (
+    InventoryID INT PRIMARY KEY,
+    ProductID INT NOT NULL,
+    WarehouseID INT NOT NULL,
+    StockQuantity INT NOT NULL DEFAULT 0 CHECK (StockQuantity >= 0),
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
+    FOREIGN KEY (WarehouseID) REFERENCES Warehouse(WarehouseID)
+);
+
+CREATE TABLE Review (
+    ReviewID INT PRIMARY KEY,
+    CustomerID INT NOT NULL,
+    SupplierID INT NOT NULL,
+    Ratings DECIMAL(2, 1) NOT NULL CHECK (Ratings BETWEEN 0 AND 5),
+    Description TEXT NOT NULL,
+    FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID),
+    FOREIGN KEY (SupplierID) REFERENCES Supplier(SupplierID)
+);
+
+CREATE TABLE GetReview(
+    ReviewID INT NOT NULL,
+    ProductID INT NOT NULL,
+	PRIMARY KEY (ReviewID, ProductID),
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
+    FOREIGN KEY (ReviewID) REFERENCES Review(ReviewID)
+
+);
+
+-- DONT KNOW ABOUT USER
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY AUTO_INCREMENT,
+    CustomerID INT UNIQUE,  -- Links to the Customer table
+    Username VARCHAR(50) NOT NULL UNIQUE,
+    PasswordHash VARCHAR(255) NOT NULL,  -- Store hashed passwords for security
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    PhoneNo VARCHAR(15) UNIQUE,  -- Optional for login via phone
+    Role ENUM('Customer', 'Admin', 'Supplier') NOT NULL DEFAULT 'Customer',
+    CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    LastLogin DATETIME DEFAULT NULL,
+    FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) ON DELETE SET NULL
+);

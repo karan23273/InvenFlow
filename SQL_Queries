@@ -1,0 +1,144 @@
+-- Query 1: Simple query to retrieve all customers and their addresses
+SELECT 
+    c.CustomerID, 
+    c.FirstName, 
+    c.LastName, 
+    a.StreetName, 
+    a.City, 
+    a.State 
+FROM Customer c
+JOIN Address a ON c.AddressID = a.AddressID;
+
+-- Query 2: Join multiple tables to get order details with customer and product information
+SELECT 
+    o.OrderID, 
+    o.OrderDate, 
+    c.FirstName, 
+    c.LastName, 
+    p.Name AS ProductName, 
+    con.Quantity, 
+    p.MRP * con.Quantity AS TotalCost
+FROM Orders o
+JOIN OrderList ol ON o.OrderID = ol.OrderID
+JOIN Customer c ON ol.CustomerID = c.CustomerID
+JOIN Contains con ON o.OrderID = con.OrderID
+JOIN Product p ON con.ProductID = p.ProductID
+ORDER BY o.OrderDate;
+
+-- Query 3: Aggregate query to find total order amount per customer
+SELECT 
+    c.CustomerID, 
+    c.FirstName, 
+    c.LastName, 
+    COUNT(o.OrderID) AS TotalOrders, 
+    SUM(o.OrderAmount) AS TotalSpent
+FROM Customer c
+LEFT JOIN OrderList ol ON c.CustomerID = ol.CustomerID
+LEFT JOIN Orders o ON ol.OrderID = o.OrderID
+GROUP BY c.CustomerID, c.FirstName, c.LastName
+HAVING TotalSpent > 0
+ORDER BY TotalSpent DESC;
+
+-- Query 4: Nested subquery to find customers who ordered products from suppliers with rating > 4.5
+SELECT DISTINCT 
+    c.FirstName, 
+    c.LastName, 
+    c.Email
+FROM Customer c
+JOIN OrderList ol ON c.CustomerID = ol.CustomerID
+JOIN Contains con ON ol.OrderID = con.OrderID
+JOIN Product p ON con.ProductID = p.ProductID
+WHERE p.SupplierID IN (
+    SELECT SupplierID 
+    FROM Supplier 
+    WHERE SupplierRating > 4.5
+)
+ORDER BY c.LastName;
+
+-- Query 5:Counts the total number of orders placed by each customer, grouping the results by customer ID, first name, and last name.
+SELECT 
+    c.CustomerID, 
+    c.FirstName, 
+    c.LastName, 
+    COUNT(o.OrderID) AS TotalOrders
+FROM 
+    Customer c
+JOIN 
+    OrderList ol ON c.CustomerID = ol.CustomerID
+JOIN 
+    Orders o ON ol.OrderID = o.OrderID
+GROUP BY 
+    c.CustomerID, c.FirstName, c.LastName;
+    
+-- Query 6: Aggregate query to find average supplier rating per category
+SELECT 
+    cat.CategoryName, 
+    COUNT(DISTINCT s.SupplierID) AS SupplierCount, 
+    AVG(s.SupplierRating) AS AvgRating
+FROM Category cat
+JOIN Product p ON cat.CategoryID = p.CategoryID
+JOIN Supplier s ON p.SupplierID = s.SupplierID
+GROUP BY cat.CategoryName
+ORDER BY AvgRating DESC;
+
+-- Query 7: Nested subquery to find products with stock quantity below average
+SELECT 
+    p.ProductID, 
+    p.Name, 
+    p.StockQuantity, 
+    cat.CategoryName
+FROM Product p
+JOIN Category cat ON p.CategoryID = cat.CategoryID
+WHERE p.StockQuantity < (
+    SELECT AVG(StockQuantity) 
+    FROM Product
+)
+ORDER BY p.StockQuantity;
+
+-- Query 8: Complex query to find top 5 customers by total order amount with their reviews
+SELECT 
+    c.CustomerID, 
+    c.FirstName, 
+    c.LastName, 
+    SUM(o.OrderAmount) AS TotalOrderAmount, 
+    AVG(r.Ratings) AS AvgRatingGiven,
+    COUNT(r.ReviewID) AS ReviewCount
+FROM Customer c
+LEFT JOIN OrderList ol ON c.CustomerID = ol.CustomerID
+LEFT JOIN Orders o ON ol.OrderID = o.OrderID
+LEFT JOIN Review r ON c.CustomerID = r.CustomerID
+GROUP BY c.CustomerID, c.FirstName, c.LastName
+ORDER BY TotalOrderAmount DESC
+LIMIT 5;
+
+-- Query 9: Join with subquery to find orders shipped from warehouses with capacity > 15000
+SELECT 
+    o.OrderID, 
+    o.OrderDate, 
+    o.OrderAmount, 
+    w.Location AS WarehouseLocation, 
+    w.Capacity
+FROM Orders o
+JOIN Contains con ON o.OrderID = con.OrderID
+JOIN Product p ON con.ProductID = p.ProductID
+JOIN Inventory i ON p.ProductID = i.ProductID
+JOIN Warehouse w ON i.WarehouseID = w.WarehouseID
+WHERE w.WarehouseID IN (
+    SELECT WarehouseID 
+    FROM Warehouse 
+    WHERE Capacity > 15000
+)
+ORDER BY o.OrderAmount DESC;
+
+-- Query 10: Nested query with joins to find suppliers with no reviews below 4
+SELECT 
+    s.SupplierID, 
+    s.SupplierName, 
+    s.SupplierRating
+FROM Supplier s
+WHERE s.SupplierID NOT IN (
+    SELECT r.SupplierID 
+    FROM Review r 
+    WHERE r.Ratings < 4.0
+)
+ORDER BY s.SupplierRating DESC;
