@@ -1,5 +1,6 @@
 
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+##################################################
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import sys  # Import the sys module
@@ -119,7 +120,6 @@ def get_status_class(stock):
 
 @app.route('/product_management', methods=['GET', 'POST'])
 def product_management():
-    print("here")
     if request.method == 'GET':
         products = Product.query.all()
         suppliers = User.query.filter_by(role='Supplier').all()
@@ -138,7 +138,8 @@ def product_management():
             # Create a new Product object
             new_product = Product(
                 Name=name,
-                category_id=category_id,
+                # Corrected: Use Capitalized ID as per your Product model's __init__
+                CategoryID=category_id,
                 SupplierID=supplier_id,
                 MRP=price,
                 StockQuantity=stock
@@ -147,12 +148,11 @@ def product_management():
             db.session.add(new_product)
             db.session.commit()
             print("Product added to database") # Debugging
-            return jsonify({'message': 'Product added successfully!'}), 200  #  Send JSON response
+            return jsonify({'message': 'Product added successfully!'}), 200  # Send JSON response
         except Exception as e:
             db.session.rollback()
             print(f"Error adding product: {e}")
             return jsonify({'error': str(e)}), 500
-
 
 @app.route('/')
 def index():
@@ -283,9 +283,6 @@ def supplier_dashboard():
     return render_template('supplier_dashboard.html', name=name)
 
 
-
-
-
 @app.route('/products')
 def products():
     return render_template('products.html')
@@ -350,7 +347,11 @@ def add_product():
 if __name__ == '__main__':
     with app.app_context():
 
+        # db.session.query(Category).delete()
+        # db.session.commit() # All categories cleared from the database
+
         db.create_all()
-        # category_name_to_add = "Toy"  # Replace with the category name you want to add
+        #  keeping category add to be hardcode
+        # category_name_to_add = "Dairy product"  # Replace with the category name you want to add
         # add_category(category_name_to_add)
     app.run(debug=True)

@@ -3,44 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Management</title>
+    <title>Product Management - Inventory Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@tailwindcss/browser@latest"></script>
     <style>
-        /* Custom CSS for the InvenFlow design - Refined */
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
         }
-        .card {
+        .status-in-stock {
+            background-color: #dcfce7; /* Green-100 */
+            color: #16a34a; /* Green-600 */
+            font-weight: 600;
+        }
+        .status-low-stock {
+            background-color: #fffbeb; /* Yellow-100 */
+            color: #d97706; /* Yellow-600 */
+            font-weight: 600;
+        }
+        .status-out-of-stock {
+            background-color: #fee2e2; /* Red-100 */
+            color: #dc2626; /* Red-600 */
+            font-weight: 600;
+        }
+        /* Custom styles to match the original "card" and "form-group" etc. */
+        .card-custom {
             background-color: white;
             border-radius: 0.5rem;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             padding: 2rem;
             margin-bottom: 2rem;
         }
-        .form-group {
+        .form-group-custom {
             margin-bottom: 1.5rem;
         }
-        .form-group label {
+        .form-label-custom {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
             color: #4a5568; /* Gray-700 */
         }
-        .form-control {
+        .form-control-custom {
             border: 1px solid #e2e8f0; /* Gray-200 */
             border-radius: 0.375rem; /* Rounded-md */
             padding: 0.75rem;
             width: 100%;
             font-size: 1rem;
-            transition: border-color 0.15s ease-in-out, shadow-sm 0.15s ease-in-out;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
-        .form-control:focus {
+        .form-control-custom:focus {
             border-color: #3182ce; /* Blue-500 */
             outline: none;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.16); /* Blue-200 */
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.16); /* Blue-200 with alpha */
         }
-        .btn-primary {
+        .btn-primary-custom {
             background-color: #3182ce; /* Blue-500 */
             color: white;
             padding: 0.75rem 1.5rem;
@@ -50,10 +66,10 @@
             transition: background-color 0.15s ease-in-out;
             border: none;
         }
-        .btn-primary:hover {
+        .btn-primary-custom:hover {
             background-color: #2b6cb0; /* Blue-700 */
         }
-        .btn-secondary {
+        .btn-secondary-custom {
             background-color: #e2e8f0; /* Gray-200 */
             color: #4a5568; /* Gray-700 */
             padding: 0.75rem 1.5rem;
@@ -63,32 +79,30 @@
             transition: background-color 0.15s ease-in-out;
             border: none;
         }
-        .btn-secondary:hover {
+        .btn-secondary-custom:hover {
             background-color: #cbd5e0; /* Gray-300 */
         }
-        .alert {
+        .alert-custom {
             padding: 1rem 1.5rem;
             border-radius: 0.375rem; /* Rounded-md */
             margin-bottom: 1.5rem;
             border: 1px solid transparent;
         }
-        .alert-danger {
+        .alert-danger-custom {
             background-color: #fee2e2; /* Red-100 */
             color: #c53030; /* Red-700 */
             border-color: #fecaca; /* Red-200 */
         }
-        .alert-success {
+        .alert-success-custom {
             background-color: #f0fdf4; /* Green-100 */
             color: #22c55e; /* Green-600 */
             border-color: #dcfce7; /* Green-200 */
         }
-
-        /* New styles for Product Table */
-        .product-table-container {
+        .product-table-container-custom {
             overflow-x: auto;
             margin-bottom: 2rem;
         }
-        .product-table {
+        .product-table-custom {
             width: 100%;
             border-collapse: collapse;
             border-spacing: 0;
@@ -96,7 +110,7 @@
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .product-table thead th {
+        .product-table-custom thead th {
             background-color: #f7fafc; /* Gray-100 */
             color: #4a5568; /* Gray-700 */
             padding: 1rem;
@@ -104,12 +118,12 @@
             font-weight: 600;
             border-bottom: 1px solid #e2e8f0; /* Gray-200 */
         }
-        .product-table tbody td {
+        .product-table-custom tbody td {
             padding: 1rem;
             color: #718096; /* Gray-600 */
             border-bottom: 1px solid #e2e8f0; /* Gray-200 */
         }
-        .product-table tbody tr:hover {
+        .product-table-custom tbody tr:hover {
             background-color: #edf2f7; /* Gray-100 */
         }
         .status-badge {
@@ -118,188 +132,172 @@
             font-size: 0.875rem;
             font-weight: 600;
         }
-        .status-in-stock {
-            background-color: #f0fdf4; /* Green-100 */
-            color: #22c55e; /* Green-600 */
-        }
-        .status-low-stock {
-            background-color: #ffedd5; /* Orange-100 */
-            color: #f59e0b; /* Orange-600 */
-        }
-        .status-out-of-stock {
-            background-color: #fee2e2; /* Red-100 */
-            color: #c53030; /* Red-700 */
-        }
-        .add-product-button {
+        .add-product-button-container {
             margin-bottom: 2rem;
             text-align: right;
         }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen py-10">
-    <div class="container max-w-4xl">
-        <h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Product Management</h1>
+    <header class="bg-gray-800 text-white p-4 shadow-md">
+        <nav class="container mx-auto flex justify-between items-center">
+            <a href="/admin_dashboard" class="text-2xl font-bold rounded-md px-3 py-1 hover:bg-gray-700 transition-colors">IMS</a>
+            <div class="flex space-x-4">
+                <a href="/admin_dashboard" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Admin Dashboard</a>
+                <a href="/supplier_dashboard" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Supplier Dashboard</a>
+                <a href="/logout" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition-all duration-300 ease-in-out">Logout</a>
+            </div>
+        </nav>
+    </header>
 
-        <div class="add-product-button">
-            <a href="{{ url_for('product_management') }}" class="btn-primary">Add Product</a>
-        </div>
+    <div class="container mx-auto max-w-4xl px-4 mt-8">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-6 text-center">Product Management</h1>
 
-        <div class="product-table-container">
-            <table class="product-table">
-                <thead>
-                    <tr>
-                        <th>Product ID</th>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Supplier ID</th>
-                        <th>MRP</th>
-                        <th>Stock</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="product-table-body">
-                    {% for product in products %}
-                    <tr>
-                        <td>{{ product.ProductID }}</td>
-                        <td>{{ product.Name }}</td>
-                        <td>{{ product.category.CategoryName }}</td>
-                        <td>{{ product.SupplierID }}</td>
-                        <td>${{ product.MRP }}</td>
-                        <td>{{ product.StockQuantity }}</td>
-                        <td><span class="status-badge {{ get_status_class(product.StockQuantity) }}">{{ get_status_text(product.StockQuantity) }}</span></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="card">
-            <form id="addProductForm" class="form-horizontal" action="{{ url_for('product_management') }}" method="post">
-                <div id="error-message" class="alert alert-danger" style="display: none;"></div>
-                <div id="success-message" class="alert alert-success" style="display: none;"></div>
-                <div class="form-group">
-                    <label for="name">Product Name <span class="text-red-500">*</span></label>
-                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter product name" required>
-                </div>
-                 <div class="form-group">
-                    <label for="category_id">Category <span class="text-red-500">*</span></label>
-                    <select id="category_id" name="category_id" class="form-control" required>
-                        {% for category in categories %}
-                            <option value="{{ category.CategoryID }}">{{ category.CategoryName }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="supplier_id">Supplier <span class="text-red-500">*</span></label>
-                     <select id="supplier_id" name="supplier_id" class="form-control" required>
-                        {% for supplier in suppliers%}
-                            <option value="{{ supplier.id }}">{{ supplier.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="stock">Stock <span class="text-red-500">*</span></label>
-                    <input type="number" id="stock" name="stock" class="form-control" placeholder="Enter stock quantity" required>
-                </div>
-                <div class="form-group">
-                    <label for="price">Price <span class="text-red-500">*</span></label>
-                    <input type="number" id="price" name="price" class="form-control" placeholder="Enter price" required>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn-primary">Add Product</button>
-                    <button type="reset" class="btn-secondary ml-2">Cancel</button>
+        <div class="card-custom">
+            <h2 class="text-2xl font-bold text-gray-800 mb-5">Add New Product</h2>
+            <form id="addProductForm" class="form-horizontal">
+                <div id="error-message" class="alert-custom alert-danger-custom" style="display: none;"></div>
+                <div id="success-message" class="alert-custom alert-success-custom" style="display: none;"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                    <div class="form-group-custom">
+                        <label for="name" class="form-label-custom">Product Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="name" name="name" class="form-control-custom" placeholder="Enter product name" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <label for="category_id" class="form-label-custom">Category <span class="text-red-500">*</span></label>
+                        <select id="category_id" name="category_id" class="form-control-custom" required>
+                            <option value="">Select Category</option>
+                            {% for category in categories %}
+                                <option value="{{ category.CategoryID }}">{{ category.CategoryName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group-custom">
+                        <label for="supplier_id" class="form-label-custom">Supplier <span class="text-red-500">*</span></label>
+                        <select id="supplier_id" name="supplier_id" class="form-control-custom" required>
+                            <option value="">Select Supplier</option>
+                            {% for supplier in suppliers %}
+                                <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group-custom">
+                        <label for="stock" class="form-label-custom">Stock Quantity <span class="text-red-500">*</span></label>
+                        <input type="number" id="stock" name="stock" class="form-control-custom" placeholder="Enter stock quantity" required min="0">
+                    </div>
+                    <div class="form-group-custom">
+                        <label for="price" class="form-label-custom">MRP (Price) <span class="text-red-500">*</span></label>
+                        <input type="number" id="price" name="price" class="form-control-custom" placeholder="Enter price" required min="0" step="0.01">
+                    </div>
+                    <div class="md:col-span-2 text-right mt-4">
+                        <button type="submit" class="btn-primary-custom">Add Product</button>
+                        <button type="reset" class="btn-secondary-custom ml-2">Cancel</button>
+                    </div>
                 </div>
             </form>
         </div>
+
+        <div class="card-custom">
+            <h2 class="text-2xl font-bold text-gray-800 mb-5">Existing Products</h2>
+            <div class="product-table-container-custom">
+                <table class="product-table-custom">
+                    <thead>
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Supplier</th>
+                            <th>MRP</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product-table-body">
+                        {% for product in products %}
+                        <tr class="hover:bg-gray-50">
+                            <td>{{ product.ProductID }}</td>
+                            <td>{{ product.Name }}</td>
+                            <td>{{ product.category.CategoryName }}</td>
+                            <td>{{ product.supplier.name }}</td> {# Access supplier name here #}
+                            <td>₹{{ "%.2f"|format(product.MRP) }}</td>
+                            <td>{{ product.StockQuantity }}</td>
+                            <td><span class="status-badge {{ get_status_class(product.StockQuantity) }}">{{ get_status_text(product.StockQuantity) }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-gray-500 py-4">No products found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+
+    <footer class="bg-gray-800 text-white p-4 text-center shadow-inner mt-8">
+        <p class="text-gray-400">&copy; 2024 Inventory Management System. All rights reserved.</p>
+    </footer>
+
     <script>
-        document.getElementById('addProductForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('name').value;
-            const category_id = document.getElementById('category_id').value;
-             const supplier_id = document.getElementById('supplier_id').value;
-            const stock = document.getElementById('stock').value;
-            const price = document.getElementById('price').value;
-            let hasErrors = false;
+        document.getElementById('addProductForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent default form submission
 
-            document.getElementById('error-message').style.display = 'none';
-            document.getElementById('success-message').style.display = 'none';
+            const form = e.target;
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
 
-            if (!name) {
-                displayErrorMessage('Product Name is required');
-                hasErrors = true;
-            }
-            if (!category_id) {
-                displayErrorMessage('Category is required');
-                hasErrors = true;
-            }
-             if (!supplier_id) {
-                displayErrorMessage('Supplier is required');
-                hasErrors = true;
-            }
-            if (!stock) {
-                displayErrorMessage('Stock is required');
-                hasErrors = true;
-            } else if (isNaN(stock) || parseInt(stock) < 0) {
-                displayErrorMessage('Stock must be a non-negative number');
-                hasErrors = true;
-            }
-            if (!price) {
-                displayErrorMessage('Price is required');
-                hasErrors = true;
-            } else if (isNaN(price) || parseFloat(price) < 0) {
-                displayErrorMessage('Price must be a non-negative number');
-                hasErrors = true;
-            }
+            // Ensure category_id, supplier_id, stock, and price are numbers
+            data.category_id = parseInt(data.category_id);
+            data.supplier_id = parseInt(data.supplier_id);
+            data.stock = parseInt(data.stock);
+            data.price = parseFloat(data.price);
 
-            if (!hasErrors) {
-                // Simulate adding product to database (replace with actual API call)
-                const productData = { name, category_id, supplier_id, stock, price };
-                addProductToDatabase(productData);
+            const errorMessageDiv = document.getElementById('error-message');
+            const successMessageDiv = document.getElementById('success-message');
 
-                document.getElementById('success-message').textContent = 'Product added successfully!';
-                document.getElementById('success-message').style.display = 'block';
-                document.getElementById('addProductForm').reset();
-               // window.location.href = "{{ url_for('products') }}";
+            errorMessageDiv.style.display = 'none';
+            successMessageDiv.style.display = 'none';
+            errorMessageDiv.textContent = '';
+            successMessageDiv.textContent = '';
+
+            try {
+                const response = await fetch('/product_management', { // Corrected URL to match Flask route
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    successMessageDiv.textContent = result.message;
+                    successMessageDiv.style.display = 'block';
+                    form.reset(); // Clear the form
+                    // Reload the page after a short delay to see the newly added product in the table
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    errorMessageDiv.textContent = 'Error: ' + (result.error || 'Unknown error');
+                    errorMessageDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                errorMessageDiv.textContent = 'An unexpected error occurred during product submission.';
+                errorMessageDiv.style.display = 'block';
             }
         });
 
+        // The displayErrorMessage function is no longer directly called by the form validation logic
+        // but it's kept here if you intend to add more client-side validation later.
         function displayErrorMessage(message) {
             const errorElement = document.getElementById('error-message');
             errorElement.textContent = message;
             errorElement.style.display = 'block';
         }
-
-
-
-        function addProductToDatabase(productData) {
-            // Simulate adding a product to the database (replace with actual API call)
-            console.log('Adding product to database:', productData);
-            // After successful addition, you might want to refresh the table
-           // renderProductTable(); // Re-render the table to show the new product
-             fetch('/add_product', {  //  endpoint
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(productData),
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to add product');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log(data);
-               // renderProductTable();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
-
-
     </script>
 </body>
 </html>

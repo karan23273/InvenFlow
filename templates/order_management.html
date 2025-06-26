@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management - Inventory Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons for better visuals (like in React example) -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide-static/lucide.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+        /* Custom styles for badges, mimicking Shadcn UI */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px; /* rounded-full */
+            padding: 0.25rem 0.75rem; /* px-2.5 py-0.5 */
+            font-size: 0.75rem; /* text-xs */
+            font-weight: 500; /* font-semibold */
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+        }
+        .badge-default {
+            background-color: #dcfce7; /* green-100 */
+            color: #16a34a; /* green-600 */
+        }
+        .badge-secondary {
+            background-color: #e0f2f7; /* blue-100 for shipped */
+            color: #0288d1; /* blue-700 */
+        }
+        .badge-outline {
+            border: 1px solid #e2e8f0; /* gray-200 */
+            color: #718096; /* gray-600 */
+        }
+        .badge-destructive {
+            background-color: #fee2e2; /* red-100 */
+            color: #dc2626; /* red-600 */
+        }
+
+        /* Replicating custom card/button styles from product_management */
+        .card-custom {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .btn-custom {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem; /* rounded-md */
+            font-weight: 500; /* medium */
+            transition: background-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
+            padding: 0.5rem 1rem; /* px-4 py-2 */
+            font-size: 0.875rem; /* text-sm */
+            line-height: 1.25rem; /* leading-5 */
+            border: none;
+            cursor: pointer;
+        }
+        .btn-default {
+            background-color: #2563eb; /* blue-600 */
+            color: white;
+        }
+        .btn-default:hover {
+            background-color: #1d4ed8; /* blue-700 */
+        }
+        .btn-outline {
+            background-color: white;
+            border: 1px solid #d1d5db; /* gray-300 */
+            color: #4b5563; /* gray-700 */
+        }
+        .btn-outline:hover {
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        .btn-destructive {
+            background-color: #ef4444; /* red-500 */
+            color: white;
+        }
+        .btn-destructive:hover {
+            background-color: #dc2626; /* red-600 */
+        }
+        .btn-ghost {
+            background-color: transparent;
+            color: #6b7280; /* gray-500 */
+            padding: 0.5rem; /* p-2 */
+        }
+        .btn-ghost:hover {
+            background-color: #e5e7eb; /* gray-100 */
+        }
+
+        /* Modal specific styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .modal-close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #6b7280;
+            line-height: 1;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        /* Dropdown Menu (simple simulation) */
+        .dropdown-menu {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            right: 0; /* Align to the right of the trigger button */
+            border-radius: 0.375rem;
+            overflow: hidden;
+            margin-top: 0.5rem; /* Space below button */
+        }
+        .dropdown-content button {
+            color: black;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+            text-align: left;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        .dropdown-content button:hover {
+            background-color: #f3f4f6;
+        }
+        .dropdown-content .separator {
+            height: 1px;
+            background-color: #e2e8f0;
+            margin: 0.25rem 0;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <header class="bg-gray-800 text-white p-4 shadow-md">
+        <nav class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold rounded-md px-3 py-1 hover:bg-gray-700 transition-colors">IMS</a>
+            <div class="flex space-x-4">
+                <a href="/customer_dashboard" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Customer Dashboard</a>
+                <a href="/admin_dashboard" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Admin Dashboard</a>
+                <a href="/supplier_dashboard" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Supplier Dashboard</a>
+                <a href="/logout" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition-all duration-300 ease-in-out">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="flex-grow container mx-auto p-6 md:p-8">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-4xl font-extrabold text-gray-800">Order Management</h1>
+            {% if user_role == "Customer" %}
+                <button class="btn-custom btn-outline flex items-center">
+                    <i data-lucide="file-text" class="mr-2 h-4 w-4"></i>
+                    Export Orders
+                </button>
+            {% elif user_role == "Admin" %}
+                <button class="btn-custom btn-default flex items-center">
+                    Generate Order Report
+                </button>
+            {% endif %}
+        </div>
+        <p class="text-lg text-gray-600 mb-8">View and manage all customer orders. Monitor statuses, assign suppliers, and resolve issues.</p>
+
+        <!-- Tabs & Search/Filter Section -->
+        <div class="bg-white p-6 rounded-lg shadow-xl mb-6">
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button class="btn-custom btn-outline tab-trigger active-tab" data-tab="all">All Orders</button>
+                <button class="btn-custom btn-outline tab-trigger" data-tab="pending">Pending</button>
+                <button class="btn-custom btn-outline tab-trigger" data-tab="processing">Processing</button>
+                <button class="btn-custom btn-outline tab-trigger" data-tab="shipped">Shipped</button>
+                <button class="btn-custom btn-outline tab-trigger" data-tab="delivered">Delivered</button>
+                {% if user_role == "Customer" %}
+                    <button class="btn-custom btn-outline tab-trigger" data-tab="cancelled">Cancelled</button>
+                {% endif %}
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-3 items-center justify-between">
+                <div class="relative w-full sm:w-auto">
+                    <i data-lucide="search" class="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400"></i>
+                    <input
+                        type="search"
+                        id="order-search"
+                        placeholder="Search orders..."
+                        class="pl-8 pr-4 py-2 w-full sm:w-[300px] rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    />
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button class="btn-custom btn-outline" title="Filter Options">
+                        <i data-lucide="sliders-horizontal" class="h-4 w-4"></i>
+                    </button>
+                    <button class="btn-custom btn-outline" title="Filter by Date">
+                        <i data-lucide="calendar" class="h-4 w-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="card-custom overflow-x-auto">
+            <h2 class="text-2xl font-bold text-gray-800 mb-5">Current Orders</h2>
+            <table class="min-w-full leading-normal table-auto">
+                <thead>
+                    <tr class="bg-gray-100 border-b border-gray-200">
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider rounded-tl-lg">Order ID</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider rounded-tr-lg">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-table-body">
+                    {% for order in orders %}
+                    <tr class="hover:bg-gray-50 {% if loop.index % 2 == 0 %}bg-gray-50{% else %}bg-white{% endif %} border-b border-gray-200 order-row" data-status="{{ order.status | lower }}">
+                        <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{{ order.id }}</td>
+                        <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-700">{{ order.date }}</td>
+                        <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-700">{{ order.customer_name }}</td>
+                        <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-900 text-right">₹{{ "%.2f"|format(order.total) }}</td>
+                        <td class="px-5 py-4 whitespace-nowrap text-sm">
+                            <span class="badge {{ get_order_badge_variant(order.status) }}">{{ order.status }}</span>
+                        </td>
+                        <td class="px-5 py-4 whitespace-nowrap text-sm text-center">
+                            <div class="dropdown-menu">
+                                <button class="btn-custom btn-ghost dropdown-trigger" title="More Actions">
+                                    <i data-lucide="more-horizontal" class="h-4 w-4"></i>
+                                </button>
+                                <div class="dropdown-content">
+                                    <button class="dropdown-item" data-action="view" data-order-db-id="{{ order.order_db_id }}" data-order-index="{{ loop.index0 }}">View Details</button>
+                                    {% if user_role == "Admin" %}
+                                        <button class="dropdown-item" data-action="update-status" data-order-db-id="{{ order.order_db_id }}" data-order-index="{{ loop.index0 }}">Update Status</button>
+                                    {% endif %}
+                                    {% if user_role == "Customer" and order.status | lower not in ['delivered', 'shipped', 'cancelled'] %}
+                                        <div class="separator"></div>
+                                        <button class="dropdown-item text-red-600 hover:bg-red-50" data-action="cancel" data-order-db-id="{{ order.order_db_id }}" data-order-index="{{ loop.index0 }}">Cancel Order</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-500">No orders found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div id="no-orders-message" class="hidden px-5 py-10 text-center text-sm text-gray-500">No orders found for this filter.</div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white p-4 text-center shadow-inner mt-8">
+        <p class="text-gray-400">&copy; 2024 Inventory Management System. All rights reserved.</p>
+    </footer>
+
+    <!-- Order Details Modal -->
+    <div id="orderDetailsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Order Details - <span id="modalOrderId"></span></h3>
+                <button class="modal-close-btn" data-close-modal="orderDetailsModal">&times;</button>
+            </div>
+            <div class="modal-body text-gray-700">
+                <p><strong>Customer:</strong> <span id="modalCustomerName"></span></p>
+                <p><strong>Order Date:</strong> <span id="modalOrderDate"></span></p>
+                <p><strong>Total Amount:</strong> ₹<span id="modalTotalAmount"></span></p>
+                <p><strong>Status:</strong> <span id="modalOrderStatus" class="badge"></span></p>
+                <h4 class="font-semibold mt-4 mb-2">Items:</h4>
+                <ul id="modalOrderItems" class="list-disc pl-5">
+                    <!-- Items will be populated here by JS -->
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-custom btn-secondary" data-close-modal="orderDetailsModal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Order Confirmation Modal -->
+    <div id="cancelOrderModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Cancellation</h3>
+                <button class="modal-close-btn" data-close-modal="cancelOrderModal">&times;</button>
+            </div>
+            <div class="modal-body text-gray-700">
+                <p>Are you sure you want to cancel order <strong id="cancelOrderId"></strong>?</p>
+                <p class="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-custom btn-secondary" data-close-modal="cancelOrderModal">No, Keep Order</button>
+                <button class="btn-custom btn-destructive" id="confirmCancelBtn">Yes, Cancel Order</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        const ordersData = {{ orders | tojson }}; // Pass Flask data to JavaScript
+        const userRole = "{{ user_role }}"; // Pass user role to JavaScript
+
+        const ordersTableBody = document.getElementById('orders-table-body');
+        const orderSearchInput = document.getElementById('order-search');
+        const tabTriggers = document.querySelectorAll('.tab-trigger');
+        const noOrdersMessage = document.getElementById('no-orders-message');
+
+        const orderDetailsModal = document.getElementById('orderDetailsModal');
+        const cancelOrderModal = document.getElementById('cancelOrderModal');
+        const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+
+        let activeOrderDbId = null; // Store the DB ID of the order currently being viewed/cancelled
+        let activeOrderIndex = null; // Store the index in the ordersData array for display updates
+
+        // Helper to get badge variant classes (must match Flask's get_order_badge_variant)
+        function getBadgeVariant(status) {
+            switch (status.toLowerCase()) {
+                case "delivered":
+                    return "badge-default";
+                case "shipped":
+                    return "badge-secondary";
+                case "processing":
+                    return "badge-outline";
+                case "pending":
+                    return "badge-secondary";
+                case "cancelled":
+                    return "badge-destructive";
+                default:
+                    return "badge-outline";
+            }
+        }
+
+        // Filter and Search Logic
+        function filterOrders() {
+            const searchTerm = orderSearchInput.value.toLowerCase().trim();
+            const activeTab = document.querySelector('.tab-trigger.active-tab').dataset.tab;
+
+            ordersTableBody.innerHTML = ''; // Clear current rows
+
+            let anyOrdersFoundInFilter = false;
+
+            ordersData.forEach((order, index) => {
+                const orderStatus = order.status.toLowerCase();
+                const matchesSearch = searchTerm === '' ||
+                                      order.id.toLowerCase().includes(searchTerm) ||
+                                      order.customer_name.toLowerCase().includes(searchTerm) ||
+                                      orderStatus.includes(searchTerm);
+
+                const matchesTab = activeTab === 'all' || orderStatus === activeTab;
+
+                if (matchesSearch && matchesTab) {
+                    anyOrdersFoundInFilter = true;
+                    // Re-create the row with data from ordersData
+                    const row = document.createElement('tr');
+                    row.classList.add('hover:bg-gray-50', 'border-b', 'border-gray-200', 'order-row');
+                    if (index % 2 === 0) { // Add alternating background for readability
+                        row.classList.add('bg-gray-50');
+                    } else {
+                        row.classList.add('bg-white');
+                    }
+                    row.dataset.status = orderStatus;
+                    row.innerHTML = `
+                        <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">${order.id}</td>
+                        <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-700">${order.date}</td>
+                        <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-700">${order.customer_name}</td>
+                        <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-900 text-right">₹${order.total.toFixed(2)}</td>
+                        <td class="px-5 py-4 whitespace-nowrap text-sm">
+                            <span class="badge ${getBadgeVariant(order.status)}">${order.status}</span>
+                        </td>
+                        <td class="px-5 py-4 whitespace-nowrap text-sm text-center">
+                            <div class="dropdown-menu">
+                                <button class="btn-custom btn-ghost dropdown-trigger" title="More Actions">
+                                    <i data-lucide="more-horizontal" class="h-4 w-4"></i>
+                                </button>
+                                <div class="dropdown-content">
+                                    <button class="dropdown-item" data-action="view" data-order-db-id="${order.order_db_id}" data-order-index="${index}">View Details</button>
+                                    ${userRole === "Admin" ? `<button class="dropdown-item" data-action="update-status" data-order-db-id="${order.order_db_id}" data-order-index="${index}">Update Status</button>` : ''}
+                                    ${userRole === "Customer" && !['delivered', 'shipped', 'cancelled'].includes(order.status.toLowerCase()) ? `
+                                        <div class="separator"></div>
+                                        <button class="dropdown-item text-red-600 hover:bg-red-50" data-action="cancel" data-order-db-id="${order.order_db_id}" data-order-index="${index}">Cancel Order</button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                    ordersTableBody.appendChild(row);
+                }
+            });
+
+            if (!anyOrdersFoundInFilter) {
+                noOrdersMessage.classList.remove('hidden');
+                ordersTableBody.classList.add('hidden');
+            } else {
+                noOrdersMessage.classList.add('hidden');
+                ordersTableBody.classList.remove('hidden');
+            }
+            lucide.createIcons(); // Re-render Lucide icons for new rows
+        }
+
+        // Event Listeners for Search and Tabs
+        orderSearchInput.addEventListener('input', filterOrders);
+        tabTriggers.forEach(tab => {
+            tab.addEventListener('click', function() {
+                tabTriggers.forEach(t => t.classList.remove('active-tab'));
+                this.classList.add('active-tab');
+                filterOrders();
+            });
+        });
+
+        // Modals Logic
+        document.addEventListener('click', async function(event) {
+            // Handle dropdown triggers
+            const dropdownTrigger = event.target.closest('.dropdown-trigger');
+            if (dropdownTrigger) {
+                const dropdown = dropdownTrigger.closest('.dropdown-menu');
+                const content = dropdown.querySelector('.dropdown-content');
+                // Close all other open dropdowns first
+                document.querySelectorAll('.dropdown-content').forEach(otherContent => {
+                    if (otherContent !== content) {
+                        otherContent.style.display = 'none';
+                    }
+                });
+                // Toggle current dropdown
+                content.style.display = content.style.display === 'block' ? 'none' : 'block';
+            } else {
+                // Close all dropdowns if click is outside
+                document.querySelectorAll('.dropdown-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+            }
+
+            // Handle dropdown actions (View, Update, Cancel)
+            const dropdownItem = event.target.closest('.dropdown-item');
+            if (dropdownItem) {
+                const action = dropdownItem.dataset.action;
+                activeOrderDbId = parseInt(dropdownItem.dataset.orderDbId);
+                activeOrderIndex = parseInt(dropdownItem.dataset.orderIndex); // Get the original index
+
+                if (action === 'view') {
+                    const order = ordersData[activeOrderIndex]; // Get order details from the original data
+                    document.getElementById('modalOrderId').textContent = order.id;
+                    document.getElementById('modalCustomerName').textContent = order.customer_name;
+                    document.getElementById('modalOrderDate').textContent = order.date;
+                    document.getElementById('modalTotalAmount').textContent = order.total.toFixed(2);
+                    
+                    const statusBadge = document.getElementById('modalOrderStatus');
+                    statusBadge.textContent = order.status;
+                    statusBadge.className = 'badge ' + getBadgeVariant(order.status); // Apply correct badge class
+
+                    const itemsList = document.getElementById('modalOrderItems');
+                    itemsList.innerHTML = '';
+                    order.items.forEach(item => {
+                        const li = document.createElement('li');
+                        li.textContent = `${item.name} (x${item.quantity}) - ₹${item.price.toFixed(2)}`;
+                        itemsList.appendChild(li);
+                    });
+                    orderDetailsModal.style.display = 'flex'; // Show modal
+                } else if (action === 'cancel') {
+                    document.getElementById('cancelOrderId').textContent = ordersData[activeOrderIndex].id;
+                    cancelOrderModal.style.display = 'flex'; // Show modal
+                } else if (action === 'update-status') {
+                    // For a real app, this would open a form/dialog to update status
+                    alert('Simulating Update Status for Order: ' + ordersData[activeOrderIndex].id);
+                }
+                // Close dropdown after action (if not already closed by click outside)
+                const parentDropdownContent = dropdownItem.closest('.dropdown-content');
+                if (parentDropdownContent) {
+                    parentDropdownContent.style.display = 'none';
+                }
+            }
+
+            // Handle modal close buttons
+            if (event.target.dataset.closeModal) {
+                document.getElementById(event.target.dataset.closeModal).style.display = 'none';
+            }
+        });
+
+        // Confirm Cancel Button
+        confirmCancelBtn.addEventListener('click', async function() {
+            if (activeOrderDbId === null) return;
+
+            try {
+                const response = await fetch(`/cancel_order/${activeOrderDbId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(result.message);
+                    // Update the order status in our local ordersData array
+                    const orderToUpdate = ordersData.find(o => o.order_db_id === activeOrderDbId);
+                    if (orderToUpdate) {
+                        orderToUpdate.status = "Cancelled";
+                    }
+                    filterOrders(); // Re-filter to reflect the change
+                } else {
+                    alert('Error: ' + (result.error || 'Failed to cancel order.'));
+                }
+            } catch (error) {
+                console.error('Error cancelling order:', error);
+                alert('An unexpected error occurred while trying to cancel the order.');
+            } finally {
+                cancelOrderModal.style.display = 'none'; // Hide modal
+                activeOrderDbId = null; // Clear active order
+                activeOrderIndex = null;
+            }
+        });
+
+        // Initial filter to display all orders on load
+        filterOrders();
+    </script>
+</body>
+</html>
