@@ -40,7 +40,7 @@ serves as a foundation for implementing advanced features.
 1.  Clone this repository:
 
     ``` bash
-    git clone <repo-link>
+    git clone https://github.com/karan23273/InvenFlow.git
     ```
 
 2.  Install dependencies:
@@ -63,7 +63,7 @@ serves as a foundation for implementing advanced features.
 
 This project is a **work-in-progress (WIP)**: - Core modules (data
 entry, data display) are functional. - Advanced features (analytics,
-restocking alerts) to be added.
+order placement, etc.) to be added.
 
 ## Future Enhancements
 
