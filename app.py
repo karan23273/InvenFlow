@@ -8,7 +8,7 @@ import sys  # Import the sys module
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = 'your_secret_key'  # Important: Set a secret key for sessions
+app.secret_key = 'your_secret_key'
 db = SQLAlchemy(app)
 
 
